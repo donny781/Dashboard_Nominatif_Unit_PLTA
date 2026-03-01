@@ -1,3 +1,9 @@
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import pagesizes
+from reportlab.lib.units import inch
+import io
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -81,7 +87,36 @@ if uploaded_file:
     csv = filtered_df.to_csv(index=False).encode("utf-8")
     st.download_button(
         "Download Data (CSV)",
-        csv,
+        csv,# ===== EXPORT PDF =====
+def generate_pdf(dataframe):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=pagesizes.A4)
+    elements = []
+
+    styles = getSampleStyleSheet()
+    elements.append(Paragraph("Laporan Data Nominatif Unit PLTA", styles["Title"]))
+    elements.append(Spacer(1, 0.5 * inch))
+
+    data = [dataframe.columns.tolist()] + dataframe.values.tolist()
+    table = Table(data)
+    table.setStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.grey),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+    ])
+
+    elements.append(table)
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
+
+pdf_file = generate_pdf(filtered_df.head(50))  # maksimal 50 baris agar tidak terlalu panjang
+
+st.download_button(
+    label="Download Laporan PDF",
+    data=pdf_file,
+    file_name="Laporan_Nominatif_PLTA.pdf",
+    mime="application/pdf"
+        )
         "data_filtered.csv",
         "text/csv"
     )
