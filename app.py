@@ -181,7 +181,8 @@ if uploaded_file:
     csv = filtered_df.to_csv(index=False).encode("utf-8")
     st.download_button(
         "Download Data (CSV)",
-        csv,# ===== EXPORT PDF =====
+        csv,
+    #===== EXPORT PDF =====
 def generate_pdf(dataframe):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=pagesizes.A4)
